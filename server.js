@@ -6,9 +6,30 @@ const app = express()
 const path = require('path')
 // set port we run in dev, if there is no port, default to 3500
 const PORT = process.env.PORT || 3500
+// init logger
+const { logger } = require('./middleware/logger')
+// add errorHandler
+const errorHandler = require('./middleware/errorHandler')
+// built in middleware init
+const cookieParser = require('cookie-parser')
+// cors stuff
+const cors = require('cors')
+const corsOptions = require('./config/corsOptions')
+
+
+app.use(logger)
+app.use(cors(corsOptions))
+// app.use(cors(corsOptions))
+
+// built in middleware function to parse incoming request bodies containing JSON payloads
+app.use(express.json())
+
+// detect cookies
+app.use(cookieParser())
 
 // telling express where to find static files like css or image
-app.use('/', express.static(path.join(__dirname, '/public')))
+app.use('/', express.static(path.join(__dirname, 'public')))
+
 // init router
 app.use('/', require('./routes/root'))
 app.all('*', (req, res) => {
@@ -26,6 +47,9 @@ app.all('*', (req, res) => {
         res.type('txt').send('404 Not Found')
     }
 })
+
+// add error handler
+app.use(errorHandler)
 
 // tell app to start listening, pass in port, and create function to print log for listening port
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
