@@ -1,3 +1,4 @@
+require('dotenv').config()
 // define express
 const express = require('express')
 // define app and call express
@@ -15,7 +16,13 @@ const cookieParser = require('cookie-parser')
 // cors stuff
 const cors = require('cors')
 const corsOptions = require('./config/corsOptions')
+const connectDB = require('./config/dbConnection')
+const mongoose = require('mongoose')
+const { logEvents } = require('./middleware/logger')
 
+console.log(process.env.NODE_ENV)
+
+connectDB()
 
 app.use(logger)
 app.use(cors(corsOptions))
@@ -51,5 +58,13 @@ app.all('*', (req, res) => {
 // add error handler
 app.use(errorHandler)
 
-// tell app to start listening, pass in port, and create function to print log for listening port
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+mongoose.connection.once('open', () => {
+    console.log('Connected to MongoDB')
+    // tell app to start listening, pass in port, and create function to print log for listening port
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+})
+
+mongoose.connection.on('error', err => {
+    console.log(err)
+    logEvents(`${err.no}\t${err.code}\t${err.syscall}\t${err.hostname}`, 'mongoErrLog.log')
+})
