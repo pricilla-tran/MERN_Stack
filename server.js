@@ -39,6 +39,7 @@ app.use('/', express.static(path.join(__dirname, 'public')))
 
 // init router
 app.use('/', require('./routes/root'))
+app.use('/users', require('./routes/userRoutes'))
 app.all('*', (req, res) => {
     // if response is 404
     res.status(404)
