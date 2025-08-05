@@ -3,7 +3,9 @@ const express = require('express')
 const router = express.Router()
 // import usersController
 const usersController = require('../controllers/usersController')
+const verifyJWT = require('../middleware/verifyJWT')
 
+router.use(verifyJWT)
 // rest api at /users direct to controller
 router.route('/')
     .get(usersController.getAllUsers) // read
